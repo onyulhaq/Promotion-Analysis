@@ -1,6 +1,8 @@
 ---
 title: "Psych 575 Promotion Analysis"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -21,12 +23,164 @@ Data Dictionary
 • is_promoted: (Target) Recommended for promotion
 
 
-```{r}
+```{r Github}
 library(usethis)
 use_git_config(user.name = "onyulhaq", user.email = "onyulhaq@usc.edu")
 
+```
 
+```{r Library}
+library(here)  # makes reading data more consistent
+library(tidyverse)  # for data manipulation and plotting
+library(haven)  # for importing SPSS/SAS/Stata data
+library(lme4)  # for multilevel analysis
+library(glmmTMB)  # also for multilevel logistic models
+library(lmerTest)  # for testing coefficients
+library(MuMIn)  # for R^2
+library(sjPlot)  # for plotting effects
+library(emmeans)  # for marginal means
+library(modelsummary)  # for making tables
+theme_set(theme_bw())  # Theme; just my personal preference
+```
+
+
+```{r}
 #Enter Data
 df <- read.csv("D:/Data Files/PSYC 575_Multilvl Model/Final project/Promotion Analysis/employee_promotion.csv", header = T, na.strings = "")
+
+df$is_promoted <- as.factor(df$is_promoted) #Make promotion into factor variable
+df$gender <- as.factor(df$gender) #Make gender into factor variable
 ```
+
+
+###Descriptives
+There are two level 2 units in this data set: Departments and Region
+
+```{r Clusters size}
+#Departments
+table(df$department) #List of departments and their sizes
+length(table(df$department)) # No. of department clusters
+min(table(df$department)) # Size of smallest department cluster size
+max(table(df$department)) # Size of largest department cluster size
+
+
+#Region
+table(df$region) #List of region and their sizes
+length(table(df$region)) # No. of region clusters
+min(table(df$region)) # Size of smallest region cluster size
+max(table(df$region)) # Size of largest region cluster size
+```
+
+
+```{r Promoted}
+barplot(table(df$is_promoted),
+        main = "Promoted Counts")
+```
+
+
+### Model Equations
+Cross-Classified Model 
+
+within cell Variables: gender
+
+Within Cell Lv-1:
+
+$$
+  \begin{aligned}
+    \text{promotion}_{i(j,k)} & \sim \text{Bernoulli}(\mu_{i(j,k)}) \\
+    \eta_{i(j,k)} & = \text{logit}(\mu_{i(j,k)}) \\
+    \eta_{i(j,k)} & = \beta_{0(j,k)} + \beta_{1(j,k)} \text{gender}_{i(j,k)}
+  \end{aligned}
+$$
+Lv-2:
+
+$$
+\begin{aligned}
+  \beta_{0j} & = \gamma_{00} + u_{0j} + v_{0k}  \\
+  \beta_{1j} & = \gamma_{10} + u_{1j} + v_{1k} \\
+  \begin{bmatrix}
+    u_{0j} \\
+    u_{1j}
+  \end{bmatrix} & \sim 
+  N\left(
+    \begin{bmatrix}
+      0 \\
+      0
+    \end{bmatrix}, 
+    \begin{bmatrix}
+      \tau^2_0 &  \\
+      \tau_{01} & \tau^2_{1}
+    \end{bmatrix}
+  \right)
+\end{aligned}
+$$
+
+### Models
+```{r Gender + Random Slopes}
+m0 <- glmmTMB(is_promoted ~ gender + (gender|department) + (gender|region),
+            data = df,
+            family = binomial("logit"),
+            REML = T)
+summary(m0)
+```
+
+### Table of Model Coefficients**
+```{r}
+msummary(list("m0" = m0))
+```
+
+### Plot of Predictors on Promotion Rates**
+```{r}
+m0_plots <- plot_model(m0,
+    type = "pred",
+    show.data = TRUE, jitter = 0.05,
+    title = "", dot.size = 0.3
+)
+m0_plots
+```
+
+###Interpretations
+
+
+A preliminary analysis indicates that there is no gender difference in promotion rates. For a female, the predicted log odds of being commended was -1.72. In comparison to females from the same department and the same region, males were associated with a decrease in log odds of .1. The estimate department level deviation in log-odds for being promoted was .35. The association of gender varied by log-odds of .23 for departments. Likewise, the association of gender varied by log-odds of .18 for regions.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
