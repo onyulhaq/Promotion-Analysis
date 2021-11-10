@@ -7,26 +7,26 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+The HR team stored data of promotion cycle last year, which consists of details of all the employees in the company working last year and also if they got promoted or not, but every time this process gets delayed due to so many details available for each employee - it gets difficult to compare and decide.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Data Dictionary
+• employeeid: Unique ID for the employee • department: Department of employee • region: Region of employment (unordered) • education: Education Level • gender: Gender of Employee • recruitmentchannel: Channel of recruitment for employee
+• no_ of_ trainings: no of other trainings completed in the previous year on soft skills, technical skills, etc.
+• age: Age of Employee
+• previous_ year_ rating: Employee Rating for the previous year
+• length_ of_ service: Length of service in years
+• awards_ won: if awards won during the previous year then 1 else 0
+• avg_ training_ score: Average score in current training evaluations
+• is_promoted: (Target) Recommended for promotion
 
-```{r cars}
-summary(cars)
+
+```{r}
+library(usethis)
+use_git_config(user.name = "onyulhaq", user.email = "onyulhaq@usc.edu")
 
 
-
-
+#Enter Data
+df <- read.csv("D:/Data Files/PSYC 575_Multilvl Model/Final project/Promotion Analysis/employee_promotion.csv", header = T, na.strings = "")
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
